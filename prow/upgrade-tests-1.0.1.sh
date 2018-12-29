@@ -14,20 +14,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# Exit immediately for non zero status
+set -e
+# Check unset variables
+set -u
+# Print commands
+set -x
 
-# This script is meant to be sourced, has a set of functions used by scripts on gcb
+# Set up inputs needed by test_upgrade.sh
+export SOURCE_VERSION=1.0.1
+export SOURCE_RELEASE_PATH="https://github.com/istio/istio/releases/download/${SOURCE_VERSION}"
+export TARGET_VERSION=${TAG}
+export TARGET_RELEASE_PATH=${ISTIO_REL_URL}
 
-#sets GITHUB_KEYFILE to github auth file
-function github_keys() {
-  GITHUB_KEYFILE="${GITHUB_TOKEN_FILE}"
-  export GITHUB_KEYFILE
-  
-  if [[ -n "$CB_TEST_GITHUB_TOKEN_FILE_PATH" ]]; then
-    local LOCAL_DIR
-    LOCAL_DIR="$(mktemp -d /tmp/github.XXXX)"
-    local KEYFILE_TEMP
-    KEYFILE_TEMP="$LOCAL_DIR/keyfile.txt"
-    GITHUB_KEYFILE="${KEYFILE_TEMP}"
-    gsutil -q cp "gs://${CB_TEST_GITHUB_TOKEN_FILE_PATH}" "${KEYFILE_TEMP}"
-  fi
-}
+# Run the corresponding test in istio source code.
+./prow/upgrade-tests.sh
+
